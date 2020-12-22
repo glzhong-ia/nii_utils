@@ -59,31 +59,40 @@ def getLabelofPoints(input_data, mask_data):
     all_mask_data_flatten[mask_data_index] = mask_data[:, 3]
     all_mask_data = all_mask_data_flatten.reshape(all_mask_data.shape)
     
-    # 补全input_data为立方体
-    input_x_index = np.unique(np.round((input_data[:, 0] - minx[0])/delta).astype(np.int32))
-    input_y_index = np.unique(np.round((input_data[:, 1] - minx[1])/delta).astype(np.int32))
-    input_z_index = np.unique(np.round((input_data[:, 2] - minx[2])/delta).astype(np.int32))
-    all_input_data = np.zeros((len(input_x_index), len(input_y_index), len(input_z_index)), dtype=np.int32)
+    # 补全input为立方体
+    input_x_int = np.round((input_data[:, 0] - minx[0])/delta).astype(np.int32)
+    input_y_int = np.round((input_data[:, 1] - minx[1])/delta).astype(np.int32)
+    input_z_int = np.round((input_data[:, 2] - minx[2])/delta).astype(np.int32)
+    sub_x_index = np.unique(input_x_int)
+    sub_y_index = np.unique(input_y_int)
+    sub_z_index = np.unique(input_z_int)
+    sub_min = input_data.min(axis=0)
+    # input 在立方体all_sub_data中的index
+    sub_index = (np.round((input_data[:, 0] - sub_min[0])/delta).astype(np.int32) * len(sub_y_index) * len(sub_z_index) + \
+                 np.round((input_data[:, 1] - sub_min[1])/delta).astype(np.int32) * len(sub_z_index) + \
+                 np.round((input_data[:, 2] - sub_min[2])/delta).astype(np.int32)).astype(np.int32)
+    all_sub_data = np.zeros((len(sub_x_index), len(sub_y_index), len(sub_z_index)), dtype=np.int32)
     
     # 计算子区间
-    input_input_x_start = int(0 if input_x_index.min() > mask_x_unique.min() else mask_x_unique.min() - input_x_index.min())
-    input_input_y_start = int(0 if input_y_index.min() > mask_y_unique.min() else mask_y_unique.min() - input_y_index.min())
-    input_input_z_start = int(0 if input_z_index.min() > mask_z_unique.min() else mask_z_unique.min() - input_z_index.min())
-    input_input_x_end = int(len(input_x_index) if input_x_index.max() < mask_x_unique.max() else len(input_x_index) + mask_x_unique.max() - input_x_index.max())
-    input_input_y_end = int(len(input_y_index) if input_y_index.max() < mask_y_unique.max() else len(input_y_index) + mask_y_unique.max() - input_y_index.max())
-    input_input_z_end = int(len(input_z_index) if input_z_index.max() < mask_z_unique.max() else len(input_z_index) + mask_z_unique.max() - input_z_index.max())
+    sub_sub_x_start = int(0 if sub_x_index.min() > mask_x_unique.min() else mask_x_unique.min() - sub_x_index.min())
+    sub_sub_y_start = int(0 if sub_y_index.min() > mask_y_unique.min() else mask_y_unique.min() - sub_y_index.min())
+    sub_sub_z_start = int(0 if sub_z_index.min() > mask_z_unique.min() else mask_z_unique.min() - sub_z_index.min())
+    sub_sub_x_end = int(len(sub_x_index) if sub_x_index.max() < mask_x_unique.max() else len(sub_x_index) + mask_x_unique.max() - sub_x_index.max())
+    sub_sub_y_end = int(len(sub_y_index) if sub_y_index.max() < mask_y_unique.max() else len(sub_y_index) + mask_y_unique.max() - sub_y_index.max())
+    sub_sub_z_end = int(len(sub_z_index) if sub_z_index.max() < mask_z_unique.max() else len(sub_z_index) + mask_z_unique.max() - sub_z_index.max())
 
-    input_mask_x_start = int(0 if input_x_index.min() < mask_x_unique.min() else input_x_index.min() - mask_x_unique.min())
-    input_mask_y_start = int(0 if input_y_index.min() < mask_y_unique.min() else input_y_index.min() - mask_y_unique.min())
-    input_mask_z_start = int(0 if input_z_index.min() < mask_z_unique.min() else input_z_index.min() - mask_z_unique.min())
-    input_mask_x_end = int(len(mask_x_unique) if input_x_index.max() > mask_x_unique.max() else len(mask_x_unique) - mask_x_unique.max() + input_x_index.max())
-    input_mask_y_end = int(len(mask_y_unique) if input_y_index.max() > mask_y_unique.max() else len(mask_y_unique) - mask_y_unique.max() + input_y_index.max())
-    input_mask_z_end = int(len(mask_z_unique) if input_z_index.max() > mask_z_unique.max() else len(mask_z_unique) - mask_z_unique.max() + input_z_index.max())
+    sub_mask_x_start = int(0 if sub_x_index.min() < mask_x_unique.min() else sub_x_index.min() - mask_x_unique.min())
+    sub_mask_y_start = int(0 if sub_y_index.min() < mask_y_unique.min() else sub_y_index.min() - mask_y_unique.min())
+    sub_mask_z_start = int(0 if sub_z_index.min() < mask_z_unique.min() else sub_z_index.min() - mask_z_unique.min())
+    sub_mask_x_end = int(len(mask_x_unique) if sub_x_index.max() > mask_x_unique.max() else len(mask_x_unique) - mask_x_unique.max() + sub_x_index.max())
+    sub_mask_y_end = int(len(mask_y_unique) if sub_y_index.max() > mask_y_unique.max() else len(mask_y_unique) - mask_y_unique.max() + sub_y_index.max())
+    sub_mask_z_end = int(len(mask_z_unique) if sub_z_index.max() > mask_z_unique.max() else len(mask_z_unique) - mask_z_unique.max() + sub_z_index.max())
 
-    all_input_data[input_input_x_start:input_input_x_end, input_input_y_start:input_input_y_end, input_input_z_start:input_input_z_end] = \
-    all_mask_data[input_mask_x_start:input_mask_x_end, input_mask_y_start:input_mask_y_end, input_mask_z_start:input_mask_z_end]
+    all_sub_data[sub_sub_x_start:sub_sub_x_end, sub_sub_y_start:sub_sub_y_end, sub_sub_z_start:sub_sub_z_end] = \
+    all_mask_data[sub_mask_x_start:sub_mask_x_end, sub_mask_y_start:sub_mask_y_end, sub_mask_z_start:sub_mask_z_end]
 
-    label_list = all_input_data.flatten().astype(np.int32)# np.zeros((len(input_data), 1), dtype=np.int32)+
+    # label_list = all_sub_data.flatten().astype(np.int32)# np.zeros((len(input), 1), dtype=np.int32)+
+    label_list = all_sub_data.flatten().astype(np.int32)[sub_index]
     
     return label_list
 
