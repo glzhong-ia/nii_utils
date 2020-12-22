@@ -127,7 +127,7 @@ def get_sub_data_by_mask(input_nii, mask_nii):
     
     labels = getLabelofPoints(input_data_flatten_affine, mask_data_flatten_affine)
     output_data = input_data_flatten_affine[
-        np.where(labels == 1)[0]
+        np.where(labels > 0)[0]
         ,:]
     return output_data
 
@@ -139,8 +139,8 @@ def get_sub_data_by_mask(input_nii, mask_nii):
 #         print(i)
 #         io.show()
 
-objpath = 'D:/data/finger/202009_K19_jsd/acti_results_S2_HeadMotion/spmT_0001.nii'
-maskpath = 'D:/data/finger/202009_K19_jsd/acti_results_S2_HeadMotion/mask.nii'
+objpath = 'D:/DATA/BNARobot/fMRI/202011_K19_ljx/acti_results_S2_HeadMotion/spmT_0001.nii'
+maskpath = 'D:/DATA/BNARobot/fMRI/brant_extract_BN_Atlas_274_with_cerebellum_without_255.nii'
 
 obj_data = nib.load(objpath)
 obj_img = obj_data.get_fdata()
@@ -149,7 +149,6 @@ obj_img = obj_data.get_fdata()
 mask_data = nib.load(maskpath)
 mask_img = mask_data.get_fdata()
 # show_img(mask_img)
-
 
 sub_obj_data_list = get_sub_data_by_mask(obj_data, mask_data)
 drawPoints(sub_obj_data_list, lower_limmit=5.0)
